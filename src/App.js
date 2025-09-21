@@ -40,6 +40,7 @@ import "./styles/App.css";
 import Header from "./components/common/Header/Header";
 
 import { AuthProvider, useAuth } from "./contexts/AuthContext";
+import ReviewWritePage from "./pages/user/review/ReviewWritePage.jsx";
 
 
 function AppRoutes() {
@@ -106,6 +107,9 @@ function AppRoutes() {
           <Route path="/product" element={<ProductManagePage />} />
           <Route path="/product/register" element={<ProductRegisterPage />} />
           <Route path="/product/edit/:productId" element={<ProductEditPage />} />
+          
+          {/* 리뷰 */}
+          <Route path="/reviews/write" element={<ReviewWritePage />} />
 
           {/* 기타 */}
           <Route path="/notice" element={<Notice />} />

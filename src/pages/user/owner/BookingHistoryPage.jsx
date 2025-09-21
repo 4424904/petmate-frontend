@@ -3,6 +3,7 @@ import dayjs from "dayjs";
 import "dayjs/locale/ko";
 import { useAuth } from "../../../contexts/AuthContext";
 import { apiRequest } from "../../../services/api";
+import { useNavigate } from "react-router-dom";
 import "./BookingHistoryPage.css";
 
 // 아이콘
@@ -19,6 +20,7 @@ const BookingHistoryPage = () => {
   const [filter, setFilter] = useState("all"); // all, pending, confirmed, completed, cancelled
   const [selectedBooking, setSelectedBooking] = useState(null);
   const [showDetailModal, setShowDetailModal] = useState(false);
+  const navigate = useNavigate();
 
   useEffect(() => {
     if (!isLogined || !user) {
@@ -28,6 +30,16 @@ const BookingHistoryPage = () => {
 
     fetchMyBookings();
   }, [isLogined, user, filter]);
+
+  const isCompleted = (status) => {
+    const s = String(status);
+    return s === "2" || s === "completed";
+  };
+
+  const goToReview = (booking) => {
+    // 예약ID = booking.id, 업체ID = booking.companyId
+    navigate(`/reviews/write?reservationId=${booking.id}&companyId=${booking.companyId}`);
+  };
 
   const fetchMyBookings = async () => {
     // user.id, user.userId, user.memberId 등 다양한 필드를 확인
@@ -387,12 +399,15 @@ const BookingHistoryPage = () => {
                 </div>
 
                 <div className="booking-actions">
-                  <button
-                    className="detail-btn"
-                    onClick={() => handleShowDetail(booking)}
-                  >
-                    상세보기
-                  </button>
+                  <button className="detail-btn">상세보기</button>
+                  {isCompleted(booking.status) && (
+                   <button
+                     className="review-btn"
+                     onClick={() => goToReview(booking)}
+                   >
+                     리뷰쓰기
+                   </button>
+                  )}
                   {canCancelBooking(booking) ? (
                     <button
                       className="cancel-btn"
