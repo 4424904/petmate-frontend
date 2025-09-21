@@ -158,7 +158,7 @@ const MapBookingModal = ({ selectedCompany, onClose, isOpen }) => {
 
   return (
     <BookingContext.Provider value={{ state, dispatch }}>
-      <div className="map-booking-modal">
+      <div className="map-booking-modal" onClick={(e) => e.stopPropagation()}>
         <div className="map-booking-header">
           <div className="map-booking-header-content">
             <button className="map-booking-close" onClick={onClose}>

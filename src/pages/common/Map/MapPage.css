@@ -22,14 +22,25 @@
   overflow: auto;
 }
 
+#map-page .booking-modal-backdrop {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: transparent;
+  z-index: 999;
+  cursor: pointer;
+}
+
 #map-page .booking-modal-overlay-center {
   position: absolute;
   top: 0;
-  left: 420px; 
+  left: 800px;
   width: 600px;
   height: 700px;
   background: none;
-  z-index: 1000; 
+  z-index: 1000;
   display: block;
   pointer-events: all;
 }
@@ -49,8 +60,8 @@
 
 @media (max-width: 1000px) {
   #map-page .booking-modal-overlay-center {
-    left: 420px; 
-    width: calc(100% - 440px);
+    left: 900px;
+    width: calc(100% - 920px);
   }
 }
 

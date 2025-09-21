@@ -2,7 +2,30 @@ import React, { useContext, useState } from "react";
 import BookingContext from "./BookingContext";
 
 const CompanyInfoCard = ({ company }) => {
+  const [imageSrc, setImageSrc] = useState(null);
+  const [imageLoaded, setImageLoaded] = useState(false);
+
+  React.useEffect(() => {
+    if (company?.image && company.image !== "/api/placeholder/80/80") {
+      setImageSrc(company.image);
+    } else {
+      setImageSrc("/api/placeholder/80/80");
+    }
+    setImageLoaded(false);
+  }, [company?.image]);
+
   if (!company || !company.name) return null;
+
+  const handleImageLoad = () => {
+    setImageLoaded(true);
+  };
+
+  const handleImageError = () => {
+    if (imageSrc !== "/api/placeholder/80/80") {
+      setImageSrc("/api/placeholder/80/80");
+    }
+    setImageLoaded(true);
+  };
 
   return (
     <div
@@ -14,19 +37,42 @@ const CompanyInfoCard = ({ company }) => {
       }}
     >
       <div style={{ display: "flex", gap: "16px", alignItems: "center" }}>
-        <img
-          src={company.image || "/api/placeholder/80/80"}
-          alt={company.name}
-          style={{
-            width: "80px",
-            height: "80px",
-            borderRadius: "8px",
-            objectFit: "cover",
-          }}
-          onError={(e) => {
-            e.target.src = "/api/placeholder/80/80";
-          }}
-        />
+        <div style={{ position: "relative", width: "80px", height: "80px" }}>
+          <img
+            src={imageSrc}
+            alt={company.name}
+            style={{
+              width: "80px",
+              height: "80px",
+              borderRadius: "8px",
+              objectFit: "cover",
+              opacity: imageLoaded ? 1 : 0,
+              transition: "opacity 0.3s ease",
+            }}
+            onLoad={handleImageLoad}
+            onError={handleImageError}
+          />
+          {!imageLoaded && (
+            <div
+              style={{
+                position: "absolute",
+                top: 0,
+                left: 0,
+                width: "80px",
+                height: "80px",
+                borderRadius: "8px",
+                backgroundColor: "#f3f4f6",
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "center",
+                fontSize: "12px",
+                color: "#9ca3af",
+              }}
+            >
+              로딩중...
+            </div>
+          )}
+        </div>
         <div>
           <h3 style={{ margin: "0 0 8px 0", fontSize: "18px" }}>
             {company.name}

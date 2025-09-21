@@ -17,6 +17,8 @@ const BookingHistoryPage = () => {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
   const [filter, setFilter] = useState("all"); // all, pending, confirmed, completed, cancelled
+  const [selectedBooking, setSelectedBooking] = useState(null);
+  const [showDetailModal, setShowDetailModal] = useState(false);
 
   useEffect(() => {
     if (!isLogined || !user) {
@@ -271,6 +273,18 @@ const BookingHistoryPage = () => {
     }
   };
 
+  // 예약 상세보기 모달 열기
+  const handleShowDetail = (booking) => {
+    setSelectedBooking(booking);
+    setShowDetailModal(true);
+  };
+
+  // 예약 상세보기 모달 닫기
+  const handleCloseDetailModal = () => {
+    setShowDetailModal(false);
+    setSelectedBooking(null);
+  };
+
   if (loading) {
     return (
       <div className="booking-history-container">
@@ -373,7 +387,12 @@ const BookingHistoryPage = () => {
                 </div>
 
                 <div className="booking-actions">
-                  <button className="detail-btn">상세보기</button>
+                  <button
+                    className="detail-btn"
+                    onClick={() => handleShowDetail(booking)}
+                  >
+                    상세보기
+                  </button>
                   {canCancelBooking(booking) ? (
                     <button
                       className="cancel-btn"
@@ -392,6 +411,116 @@ const BookingHistoryPage = () => {
           </div>
         )}
       </div>
+
+      {/* 예약 상세보기 모달 */}
+      {showDetailModal && selectedBooking && (
+        <div className="modal-overlay" onClick={handleCloseDetailModal}>
+          <div className="booking-detail-modal" onClick={(e) => e.stopPropagation()}>
+            <div className="modal-header">
+              <h2>예약 상세 정보</h2>
+              <button className="modal-close-btn" onClick={handleCloseDetailModal}>
+                ✕
+              </button>
+            </div>
+
+            <div className="modal-content">
+              <div className="detail-section">
+                <h3>예약 정보</h3>
+                <div className="detail-grid">
+                  <div className="detail-item">
+                    <label>예약번호</label>
+                    <span>{selectedBooking.id}</span>
+                  </div>
+                  <div className="detail-item">
+                    <label>상태</label>
+                    <span>{getStatusBadge(selectedBooking.status)}</span>
+                  </div>
+                  <div className="detail-item">
+                    <label>서비스명</label>
+                    <span>{selectedBooking.productName || "펫케어 서비스"}</span>
+                  </div>
+                  <div className="detail-item">
+                    <label>업체명</label>
+                    <span>{selectedBooking.companyName || "업체명"}</span>
+                  </div>
+                </div>
+              </div>
+
+              <div className="detail-section">
+                <h3>예약 일시</h3>
+                <div className="detail-grid">
+                  <div className="detail-item">
+                    <label>예약일</label>
+                    <span>{formatDate(selectedBooking.reservationDate)}</span>
+                  </div>
+                  <div className="detail-item">
+                    <label>시간</label>
+                    <span>
+                      {formatTime(selectedBooking.startTime || selectedBooking.startDt)} - {formatTime(selectedBooking.endTime || selectedBooking.endDt)}
+                    </span>
+                  </div>
+                </div>
+              </div>
+
+              <div className="detail-section">
+                <h3>펫 정보</h3>
+                <div className="detail-grid">
+                  <div className="detail-item">
+                    <label>반려동물</label>
+                    <span>{selectedBooking.petNames || "정보 없음"}</span>
+                  </div>
+                  <div className="detail-item">
+                    <label>펫 수</label>
+                    <span>{selectedBooking.petCount || 0}마리</span>
+                  </div>
+                </div>
+              </div>
+
+              <div className="detail-section">
+                <h3>결제 정보</h3>
+                <div className="detail-grid">
+                  <div className="detail-item">
+                    <label>총 금액</label>
+                    <span className="price-highlight">
+                      {selectedBooking.totalPrice?.toLocaleString() || "0"}원
+                    </span>
+                  </div>
+                  <div className="detail-item">
+                    <label>결제 상태</label>
+                    <span>{selectedBooking.paymentStatusName || "결제전"}</span>
+                  </div>
+                </div>
+              </div>
+
+              {selectedBooking.specialRequest && (
+                <div className="detail-section">
+                  <h3>특별 요청사항</h3>
+                  <div className="special-request">
+                    {selectedBooking.specialRequest}
+                  </div>
+                </div>
+              )}
+            </div>
+
+            <div className="modal-actions">
+              {canCancelBooking(selectedBooking) && (
+                <button
+                  className="cancel-btn"
+                  onClick={() => {
+                    handleCancelBooking(selectedBooking.id);
+                    handleCloseDetailModal();
+                  }}
+                >
+                  예약 취소
+                </button>
+              )}
+              <button className="close-btn" onClick={handleCloseDetailModal}>
+                닫기
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 };

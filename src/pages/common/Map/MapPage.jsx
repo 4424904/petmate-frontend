@@ -397,13 +397,16 @@ useEffect(() => {
         />
 
         {bookingModalOpen && (
-          <div className="booking-modal-overlay-center">
-            <MapBookingModal
-              selectedCompany={bookingCompany}
-              onClose={handleCloseBookingModal}
-              isOpen={bookingModalOpen}
-            />
-          </div>
+          <>
+            <div className="booking-modal-backdrop" onClick={handleCloseBookingModal}></div>
+            <div className="booking-modal-overlay-center">
+              <MapBookingModal
+                selectedCompany={bookingCompany}
+                onClose={handleCloseBookingModal}
+                isOpen={bookingModalOpen}
+              />
+            </div>
+          </>
         )}
       </div>
     </div>
