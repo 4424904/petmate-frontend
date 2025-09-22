@@ -139,7 +139,7 @@ const PetSelection = ({ pets, selectedPets, onPetToggle, loading }) => {
 
   return (
     <div className="pet-list">
-      {pets.map((pet) => {
+      {Array.isArray(pets) && pets.map((pet) => {
         // 백엔드 응답 형식에 맞게 수정
         const petBreed = pet.breed || pet.breedName || "알 수 없음";
         const petAge = pet.ageYear || "알 수 없음";
@@ -246,9 +246,12 @@ const DateSelectStep = () => {
       setLoading(true);
       const myPets = await getMyPets();
       console.log("내 반려동물 목록:", myPets);
-      setPets(myPets);
+
+      // 서버 응답이 배열인지 확인하고 안전하게 처리
+      const petsArray = Array.isArray(myPets) ? myPets : (myPets ? [myPets] : []);
+      setPets(petsArray);
       // BookingContext에도 펫 정보 저장
-      dispatch({ type: "SET_AVAILABLE_PETS", payload: myPets });
+      dispatch({ type: "SET_AVAILABLE_PETS", payload: petsArray });
     } catch (error) {
       console.error("반려동물 정보 로드 실패:", error);
       // 에러 시 빈 배열로 설정

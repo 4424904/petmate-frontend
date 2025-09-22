@@ -100,10 +100,14 @@ const BookingConfirmStep = () => {
         startDt: startDateTime,
         endDt: endDateTime,
         petCount: state.selectedPets.length || 1,
+        selectedPetIds: state.selectedPets, // 선택된 반려동물 ID 배열 추가
         totalPrice: total,
-        specialRequests: state.specialRequests || "",
+        specialRequest: state.specialRequests || "",
         status: "0", // 예약대기
       };
+
+      console.log("예약 데이터:", bookingData);
+      console.log("선택된 펫 IDs:", state.selectedPets);
 
       const createdBooking = await createBooking(bookingData);
       if (!createdBooking || !createdBooking.id) {

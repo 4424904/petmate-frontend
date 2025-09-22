@@ -1,15 +1,18 @@
 import React, { useContext, useState } from "react";
 import BookingContext from "./BookingContext";
+import { getImageUrl } from "../../util/ImageUtil";
 
 const CompanyInfoCard = ({ company }) => {
   const [imageSrc, setImageSrc] = useState(null);
   const [imageLoaded, setImageLoaded] = useState(false);
 
   React.useEffect(() => {
-    if (company?.image && company.image !== "/api/placeholder/80/80") {
-      setImageSrc(company.image);
+    const imageUrl = getImageUrl(company?.image);
+    if (imageUrl) {
+      setImageSrc(imageUrl);
     } else {
-      setImageSrc("/api/placeholder/80/80");
+      // 외부 플레이스홀더 서비스 사용
+      setImageSrc("https://via.placeholder.com/80x80/e5e7eb/9ca3af?text=No+Image");
     }
     setImageLoaded(false);
   }, [company?.image]);
@@ -21,9 +24,8 @@ const CompanyInfoCard = ({ company }) => {
   };
 
   const handleImageError = () => {
-    if (imageSrc !== "/api/placeholder/80/80") {
-      setImageSrc("/api/placeholder/80/80");
-    }
+    // 외부 플레이스홀더 서비스로 대체
+    setImageSrc("https://via.placeholder.com/80x80/e5e7eb/9ca3af?text=No+Image");
     setImageLoaded(true);
   };
 

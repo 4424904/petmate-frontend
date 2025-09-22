@@ -192,7 +192,7 @@ export const bookingService = {
       userLocation: booking.location || '위치 정보 없음',
       userAvatar: '/avatars/default.jpg',
       serviceName: booking.productName || '서비스명 없음',
-      petInfo: `${booking.petCount || 0}마리`,
+      petInfo: booking.petInfo || (booking.petCount ? `반려동물 ${booking.petCount}마리` : '반려동물 정보 없음'),
       startTime: booking.startDt ? dayjs(booking.startDt).format('HH:mm') : '시간 없음',
       endTime: booking.endDt ? dayjs(booking.endDt).format('HH:mm') : '시간 없음',
       price: booking.totalPrice || 0,

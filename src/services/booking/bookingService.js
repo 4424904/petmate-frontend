@@ -1,10 +1,11 @@
 import { apiRequest } from './../api';
-
+import api from './../api';
 
 // 예약 생성
 export const createBooking = async (bookingData) => {
     try {
-        const response = await apiRequest.post('/api/booking', bookingData);
+        // 예약 생성 API는 인증이 필요 없으므로 api 인스턴스 직접 사용 (Authorization 헤더 없음)
+        const response = await api.post('/api/booking', bookingData);
         return response.data;
     } catch (error) {
         console.error("예약 생성 실패: ", error);

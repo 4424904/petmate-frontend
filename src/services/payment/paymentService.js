@@ -1,9 +1,11 @@
 import { apiRequest } from './../api';
+import api from './../api';
 
-// 결제 요청 
+// 결제 요청
 export const createPaymentRequest = async (paymentData) => {
     try {
-        const response = await apiRequest.post("/api/payment/process", paymentData);
+        // 결제 API는 인증이 필요 없으므로 api 인스턴스 직접 사용 (Authorization 헤더 없음)
+        const response = await api.post("/api/payment/process", paymentData);
         return response.data;
     } catch(error) {
         console.error('결제 요청 생성 실패: ', error);
