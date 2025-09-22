@@ -5,11 +5,10 @@ FROM node:20-alpine as build
 WORKDIR /app
 
 # package.json과 yarn.lock 복사
-COPY package*.json yarn.lock* ./
+COPY package.json yarn.lock ./
 
-# yarn 설치 및 의존성 설치
-RUN npm install -g yarn
-RUN yarn install --frozen-lockfile
+# yarn으로 의존성 설치 (프로덕션 + 캐시 최적화)
+RUN yarn install --frozen-lockfile --production=false
 
 # 소스 코드 복사
 COPY . .
