@@ -215,6 +215,26 @@ export const apiRequest = {
             throw e;
         }
     },
+      patch: async (url, data, config = {}) => {
+    try {
+      return await api.patch(url, data, {
+        ...config,
+        headers: { ...config.headers, ...getAuthHeaders() }
+      });
+    } catch (e) {
+      if (e?.response?.status === 401) {
+        const t = await tryRefresh();
+        if (t) {
+          return await api.patch(url, data, {
+            ...config,
+            headers: { ...config.headers, Authorization: `Bearer ${t}` }
+          });
+        }
+        setAccessToken("");
+      }
+      throw e;
+    }
+  },
 };
 
 export default api;
