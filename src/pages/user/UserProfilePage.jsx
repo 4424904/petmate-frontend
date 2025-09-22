@@ -153,10 +153,10 @@ export default function UserProfilePage() {
             fd.append("targetRole", targetRole);
 
             // 펫메이트 추가 필드
-            if (isPetmateMode) {
+            // if (isPetmateMode) {
                 fd.append("nickName", form.nickName.trim());
                 fd.append("phone", form.phone.trim());
-            }
+            // }
 
             // 통합 API 엔드포인트 사용
             await apiRequest.post("/user/profile/apply", fd);
