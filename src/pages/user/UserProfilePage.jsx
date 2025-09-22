@@ -203,7 +203,7 @@ export default function UserProfilePage() {
     const getSuccessRedirect = () => {
         if (isPetmateMode) {
             return [
-                { label: "업체 등록하기", path: "/company/register" },
+                { label: "업체 등록하기", path: "/companyregister" },
                 { label: "건너뛰기", path: "/home" }
             ];
         } else {

@@ -275,9 +275,9 @@ function Header() {
               {/* 반려인 메뉴 */}
               {showOwnerFeatures && (
                 <>
-                  <Link to="/favorites">
+                  {/* <Link to="/favorites">
                     <Star size={16} className="nav-icon" /> 즐겨찾기
-                  </Link>
+                  </Link> */}
                   <Link to="/my-bookings">
                     <CalendarCheck size={16} className="nav-icon" /> 예약내역
                   </Link>
