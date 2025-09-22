@@ -1,3 +1,353 @@
+/* 달력 예약 표시 스타일 *//* 달력 예약 표시 스타일 */
+.reservation-indicator {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  pointer-events: none;
+}
+
+.reservation-dot {
+  width: 6px;
+  height: 6px;
+  background: #eb9666;
+  border-radius: 50%;
+  margin-bottom: 2px;
+}
+
+.reservation-count {
+  font-size: 10px;
+  font-weight: 600;
+  color: #eb9666;
+  line-height: 1;
+  min-width: 14px;
+  text-align: center;
+}
+
+/* 달력 타일 클래스 */
+.calendar-has-reservation {
+  position: relative;
+}
+
+.calendar-has-reservation abbr {
+  color: #e05353 !important;
+  font-weight: 600 !important;
+}
+
+.calendar-today.calendar-has-reservation abbr {
+  color: white !important;
+}
+
+.calendar-selected.calendar-has-reservation {
+  background: linear-gradient(135deg, #eb9666, #e05353) !important;
+}
+
+.calendar-selected.calendar-has-reservation abbr {
+  color: white !important;
+}
+
+/* 예약 카드 & 리스트 */
+.reservation-list {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.reservation-card {
+  background: #fff;
+  border-left: 6px solid #eb9666; /* 대표색 포인트 */
+  border-radius: 12px;
+  padding: 20px;
+  box-shadow: 0 3px 6px rgba(0,0,0,0.08);
+  transition: all 0.2s;
+}
+
+.reservation-card:hover {
+  box-shadow: 0 6px 12px rgba(0,0,0,0.12);
+  transform: translateY(-2px);
+}
+
+/* 카드 헤더 */
+.card-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-bottom: 16px;
+}
+
+.user-info {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  flex: 1;
+}
+
+.user-avatar {
+  width: 48px;
+  height: 48px;
+  border-radius: 50%;
+  overflow: hidden;
+  background-color: #f3f4f6;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.user-avatar img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.user-details {
+  flex: 1;
+  min-width: 0;
+}
+
+.user-name {
+  font-size: 16px;
+  font-weight: 600;
+  color: #333;
+  margin: 0 0 4px 0;
+}
+
+.user-location {
+  font-size: 14px;
+  color: #666;
+  margin: 0 0 4px 0;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.created-time {
+  font-size: 12px;
+  color: #999;
+  margin: 0;
+}
+
+/* 상태 배지 */
+.status-badge {
+  padding: 6px 12px;
+  border-radius: 20px;
+  font-size: 12px;
+  font-weight: 600;
+  text-align: center;
+  min-width: 90px;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  justify-content: center;
+}
+
+.status-pending {
+  background-color: #fff0e6;
+  color: #eb9666; /* 대표색 */
+}
+
+.status-approved {
+  background-color: #e6f8f0;
+  color: #28a745; /* 그린 */
+}
+
+.status-rejected {
+  background-color: #fde2e1;
+  color: #e05353; /* 보조색 */
+}
+
+/* 카드 내용 */
+.card-content {
+  margin-bottom: 16px;
+}
+
+.service-info {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.info-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  min-height: 20px;
+}
+
+.info-row .label {
+  font-size: 14px;
+  color: #666;
+  font-weight: 500;
+  min-width: 80px;
+}
+
+.info-row .value {
+  font-size: 14px;
+  color: #333;
+  text-align: right;
+  font-weight: 500;
+}
+
+.info-row .value.time {
+  color: #666;
+  font-weight: 500;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.info-row .value.price {
+  color: #eb9666; /* 대표색 */
+  font-weight: 700;
+  font-size: 16px;
+}
+
+/* 카드 액션 버튼 */
+.card-actions {
+  display: flex;
+  gap: 8px;
+  justify-content: flex-end;
+}
+
+.card-actions button {
+  padding: 8px 16px;
+  border-radius: 6px;
+  font-size: 14px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+/* 버튼 색상 */
+.btn-details {
+  background-color: #f8f9fa;
+  color: #444;
+  border: 1px solid #ddd;
+}
+.btn-details:hover {
+  background-color: #eb9666; /* 대표색 */
+  color: #fff;
+  border-color: #eb9666;
+}
+
+.btn-approve {
+  background-color: #eb9666; /* 대표색 */
+  color: #fff;
+  border: none;
+}
+.btn-approve:hover {
+  background-color: #e05353; /* 보조색 */
+}
+
+.btn-reject {
+  background-color: #e05353; /* 보조색 */
+  color: #fff;
+  border: none;
+}
+.btn-reject:hover {
+  background-color: #c74444;
+}
+
+.btn-message {
+  background-color: #f8f9fa;
+  color: #666;
+  border: 1px solid #ddd;
+}
+.btn-message:hover {
+  background-color: #eb9666; /* 대표색 */
+  color: #fff;
+  border-color: #eb9666;
+}
+
+/* 반응형 */
+@media (max-width: 640px) {
+  .reservation-card {
+    padding: 16px;
+  }
+
+  .card-header {
+    flex-direction: column;
+    gap: 12px;
+    align-items: stretch;
+  }
+
+  .status-badge {
+    align-self: flex-start;
+  }
+
+  .info-row {
+    flex-direction: column;
+    gap: 4px;
+  }
+
+  .info-row .value {
+    text-align: left;
+  }
+
+  .card-actions {
+    flex-wrap: wrap;
+    justify-content: stretch;
+  }
+
+  .card-actions button {
+    flex: 1;
+    min-width: 0;
+    justify-content: center;
+  }
+}
+
+.reservation-indicator {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  pointer-events: none;
+}
+
+.reservation-dot {
+  width: 6px;
+  height: 6px;
+  background: #eb9666;
+  border-radius: 50%;
+  margin-bottom: 2px;
+}
+
+.reservation-count {
+  font-size: 10px;
+  font-weight: 600;
+  color: #eb9666;
+  line-height: 1;
+  min-width: 14px;
+  text-align: center;
+}
+
+/* 달력 타일 클래스 */
+.calendar-has-reservation {
+  position: relative;
+}
+
+.calendar-has-reservation abbr {
+  color: #e05353 !important;
+  font-weight: 600 !important;
+}
+
+.calendar-today.calendar-has-reservation abbr {
+  color: white !important;
+}
+
+.calendar-selected.calendar-has-reservation {
+  background: linear-gradient(135deg, #eb9666, #e05353) !important;
+}
+
+.calendar-selected.calendar-has-reservation abbr {
+  color: white !important;
+}
+
 /* 예약 카드 & 리스트 */
 .reservation-list {
   display: flex;

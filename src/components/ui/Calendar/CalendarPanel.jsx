@@ -7,7 +7,7 @@ import "dayjs/locale/ko";
 // Day.js 한국어 로케일 설정
 dayjs.locale("ko");
 
-const CalendarPanel = ({ selectedDate, onDateChange, todayStats }) => {
+const CalendarPanel = ({ selectedDate, onDateChange, todayStats, monthlyReservations = {} }) => {
   // Day.js를 사용한 날짜 포맷팅 함수들
   const formatMonth = (locale, date) => {
     return dayjs(date).format("M월");
@@ -31,12 +31,20 @@ const CalendarPanel = ({ selectedDate, onDateChange, todayStats }) => {
     onDateChange(date);
   };
 
-  // 특정 날짜에 예약이 있는지 표시하는 함수 (향후 확장 가능)
+  // 특정 날짜에 예약이 있는지 표시하는 함수
   const getTileContent = ({ date, view }) => {
     if (view === "month") {
-      // 예약이 있는 날짜에 점 표시 등을 추가할 수 있음
-      // const hasReservation = checkIfDateHasReservation(date);
-      // return hasReservation ? <div className="reservation-dot"></div> : null;
+      const dateStr = dayjs(date).format('YYYY-MM-DD');
+      const reservationCount = monthlyReservations[dateStr] || 0;
+
+      if (reservationCount > 0) {
+        return (
+          <div className="reservation-indicator">
+            <div className="reservation-dot"></div>
+            <div className="reservation-count">{reservationCount}</div>
+          </div>
+        );
+      }
       return null;
     }
   };
@@ -45,6 +53,8 @@ const CalendarPanel = ({ selectedDate, onDateChange, todayStats }) => {
   const getTileClassName = ({ date, view }) => {
     if (view === "month") {
       const classes = [];
+      const dateStr = dayjs(date).format('YYYY-MM-DD');
+      const reservationCount = monthlyReservations[dateStr] || 0;
 
       // 오늘 날짜
       if (dayjs(date).isSame(dayjs(), "day")) {
@@ -59,6 +69,11 @@ const CalendarPanel = ({ selectedDate, onDateChange, todayStats }) => {
       // 과거 날짜
       if (dayjs(date).isBefore(dayjs(), "day")) {
         classes.push("calendar-past");
+      }
+
+      // 예약이 있는 날짜
+      if (reservationCount > 0) {
+        classes.push("calendar-has-reservation");
       }
 
       return classes.join(" ");

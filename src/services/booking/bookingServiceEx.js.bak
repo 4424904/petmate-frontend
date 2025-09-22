@@ -74,57 +74,6 @@ export const bookingService = {
     }
   },
 
-  // 월별 예약 현황 가져오기 (달력 표시용)
-  async getMonthlyReservations(date, userInfo = null) {
-    try {
-      console.log('getMonthlyReservations - 전달받은 userInfo:', userInfo);
-      const companyId = userInfo?.companyId;
-
-      if (!companyId) {
-        throw new Error('업체 정보를 찾을 수 없습니다.');
-      }
-
-      const startOfMonth = dayjs(date).startOf('month').format('YYYY-MM-DD');
-      const endOfMonth = dayjs(date).endOf('month').format('YYYY-MM-DD');
-
-      const searchParams = {
-        startDate: startOfMonth,
-        endDate: endOfMonth,
-        limit: 1000,
-        offset: 0
-      };
-
-      console.log(`월별 예약 현황 조회: 업체 ID ${companyId}, ${startOfMonth} ~ ${endOfMonth}`);
-
-      const response = await apiRequest.get(`/api/booking/company/${companyId}`, {
-        params: searchParams
-      });
-
-      if (!response.data) {
-        return {};
-      }
-
-      const bookings = Array.isArray(response.data) ? response.data : [response.data];
-
-      // 날짜별로 예약 수 집계
-      const dateMap = {};
-      bookings.forEach(booking => {
-        const bookingDate = booking.startDt ? dayjs(booking.startDt).format('YYYY-MM-DD') : null;
-        if (bookingDate) {
-          if (!dateMap[bookingDate]) {
-            dateMap[bookingDate] = 0;
-          }
-          dateMap[bookingDate]++;
-        }
-      });
-
-      return dateMap;
-    } catch (error) {
-      console.error('월별 예약 현황 조회 실패:', error);
-      return {};
-    }
-  },
-
   // 예약 상태 업데이트
   async updateReservationStatus(reservationId, status, userInfo = null) {
     try {

@@ -31,6 +31,7 @@ const BookingManagePage = () => {
   });
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
+  const [monthlyReservations, setMonthlyReservations] = useState({});
 
   // companyId 상태 추가
   const [companyId, setCompanyId] = useState(null);
@@ -92,6 +93,7 @@ const BookingManagePage = () => {
       console.log(`companyId=${companyId}로 예약 데이터 조회 시작`);
       fetchReservations();
       fetchTodayStats();
+      fetchMonthlyReservations();
     } else {
       console.log(`companyId가 없어서 데이터 조회를 건너뜁니다.`);
     }
@@ -150,10 +152,35 @@ const BookingManagePage = () => {
     }
   };
 
+  const fetchMonthlyReservations = async () => {
+    if (!companyId) return;
+
+    try {
+      // 월별 예약 데이터 가져오기 (서비스에서 이미 날짜별로 집계해서 반환)
+      const reservationsByDate = await bookingService.getMonthlyReservations(
+        selectedDate,
+        { ...user, companyId }
+      );
+
+      setMonthlyReservations(reservationsByDate);
+      console.log("월별 예약 데이터:", reservationsByDate);
+    } catch (error) {
+      console.error("월별 예약 데이터 로딩 실패:", error);
+      setMonthlyReservations({});
+    }
+  };
+
   const handleDateChange = (date) => {
     console.log("선택된 날짜:", dayjs(date).format("YYYY-MM-DD")); // 디버깅용
     setSelectedDate(date);
   };
+
+  // 월이 변경될 때 월별 예약 데이터 다시 가져오기
+  useEffect(() => {
+    if (companyId) {
+      fetchMonthlyReservations();
+    }
+  }, [companyId, dayjs(selectedDate).format('YYYY-MM')]);
 
   const handleReservationUpdate = async (reservationId, action) => {
     try {
@@ -345,6 +372,7 @@ const BookingManagePage = () => {
             selectedDate={selectedDate}
             onDateChange={handleDateChange}
             todayStats={todayStats}
+            monthlyReservations={monthlyReservations}
           />
         </div>
 
