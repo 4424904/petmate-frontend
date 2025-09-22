@@ -433,6 +433,7 @@ function MapContainer({
   // 지도 클릭 핸들러
   const handleMapClick = useCallback((mouseEvent) => {
     console.log('지도 클릭 이벤트:', mouseEvent); // 디버깅용
+    console.log('userMarkerRef.current:', userMarkerRef.current); // 디버깅용
 
     // 업체 마커 선택 해제
     if (currentSelectedMarkerRef.current) {
@@ -442,10 +443,12 @@ function MapContainer({
       currentSelectedMarkerRef.current.setZIndex(1);
     }
     currentSelectedMarkerRef.current = null;
+
+    // 선택된 업체 해제 (모달 닫기)
     onCompanySelect(null);
 
     // 지도 클릭 시 파란색 마커 이동
-    if (userMarkerRef.current && mouseEvent) {
+    if (userMarkerRef.current && mouseEvent && mouseEvent.latLng) {
       // 카카오맵에서는 mouseEvent.latLng가 클릭한 위치의 좌표
       const clickPosition = mouseEvent.latLng;
       const newLat = clickPosition.getLat();
@@ -461,6 +464,8 @@ function MapContainer({
       onLocationChange(newLat, newLng, zoomLevel);
 
       console.log(`지도 클릭으로 마커 이동: 위도 ${newLat}, 경도 ${newLng}`);
+    } else {
+      console.log('사용자 마커가 없거나 클릭 이벤트에 위치 정보가 없습니다.');
     }
   }, [onCompanySelect, onLocationChange]);
 
@@ -484,6 +489,8 @@ function MapContainer({
     window.kakao.maps.event.addListener(map, "zoom_changed", handleMapChange);
     window.kakao.maps.event.addListener(map, "click", handleMapClick);
 
+    console.log('지도 클릭 이벤트 리스너 등록 완료');
+
     return () => {
       if (map) {
         window.kakao.maps.event.removeListener(map, "dragend", handleMapChange);
@@ -501,14 +508,16 @@ function MapContainer({
   useEffect(() => {
     if (!mapRef.current || !userLocation) return;
 
-    // 기존 사용자 마커 제거
+    const userPosition = new window.kakao.maps.LatLng(userLocation.latitude, userLocation.longitude);
+
+    // 기존 사용자 마커가 있으면 위치만 업데이트
     if (userMarkerRef.current) {
-      userMarkerRef.current.setMap(null);
-      userMarkerRef.current = null;
+      userMarkerRef.current.setPosition(userPosition);
+      console.log('사용자 마커 위치 업데이트:', userLocation);
+      return;
     }
 
-    // 새 사용자 마커 생성
-    const userPosition = new window.kakao.maps.LatLng(userLocation.latitude, userLocation.longitude);
+    // 사용자 마커가 없으면 새로 생성
     createUserMarker(mapRef.current, userPosition).then(marker => {
       if (marker) {
         userMarkerRef.current = marker;
@@ -531,18 +540,113 @@ function MapContainer({
   // 지도 중심 변경 (userLocation 변경시)
   useEffect(() => {
     if (!mapRef.current || !userLocation) return;
-    
+
     const moveLatLon = new window.kakao.maps.LatLng(
-      userLocation.latitude, 
+      userLocation.latitude,
       userLocation.longitude
     );
     mapRef.current.setCenter(moveLatLon);
-    
-    // 사용자 마커 위치도 업데이트
-    if (userMarkerRef.current) {
-      userMarkerRef.current.setPosition(moveLatLon);
-    }
   }, [userLocation]);
+
+  // 선택된 업체가 변경될 때 지도 이동
+  useEffect(() => {
+    if (!mapRef.current || !selectedCompany) return;
+
+    const moveLatLon = new window.kakao.maps.LatLng(
+      parseFloat(selectedCompany.latitude),
+      parseFloat(selectedCompany.longitude)
+    );
+    mapRef.current.panTo(moveLatLon);
+
+    console.log(`업체 선택으로 지도 이동: ${selectedCompany.name} (${selectedCompany.latitude}, ${selectedCompany.longitude})`);
+  }, [selectedCompany]);
+
+  // 선택된 업체의 임시 마커 생성 (현재 companies에 없는 경우)
+  const selectedCompanyMarkerRef = useRef(null);
+  const selectedCompanyLabelRef = useRef(null);
+
+  useEffect(() => {
+    if (!mapRef.current) return;
+
+    // selectedCompany가 null인 경우 (모달 닫기)는 임시 마커를 유지
+    if (!selectedCompany) return;
+
+    // 새로운 업체가 선택된 경우에만 기존 임시 마커 제거
+    if (selectedCompanyMarkerRef.current) {
+      selectedCompanyMarkerRef.current.setMap(null);
+      selectedCompanyMarkerRef.current = null;
+    }
+    if (selectedCompanyLabelRef.current) {
+      selectedCompanyLabelRef.current.setMap(null);
+      selectedCompanyLabelRef.current = null;
+    }
+
+    // 현재 companies 배열에 selectedCompany가 있는지 확인
+    const isInCurrentCompanies = companies.some(company => company.id === selectedCompany.id);
+
+    if (!isInCurrentCompanies) {
+      // companies 배열에 없으면 커스텀 마커 생성
+      (async () => {
+        try {
+          const markerImageData = await getMarkerImageForService(selectedCompany.repService, true);
+
+          const markerImage = new window.kakao.maps.MarkerImage(
+            markerImageData.url,
+            new window.kakao.maps.Size(markerImageData.size.w, markerImageData.size.h),
+            {
+              offset: new window.kakao.maps.Point(markerImageData.offset.x, markerImageData.offset.y),
+            }
+          );
+
+          const marker = new window.kakao.maps.Marker({
+            position: new window.kakao.maps.LatLng(
+              parseFloat(selectedCompany.latitude),
+              parseFloat(selectedCompany.longitude)
+            ),
+            image: markerImage,
+            map: mapRef.current,
+            zIndex: 1000
+          });
+
+          // 마커 클릭 이벤트 추가
+          window.kakao.maps.event.addListener(marker, 'click', () => {
+            onCompanySelect(selectedCompany);
+          });
+
+          // 업체명 라벨 생성
+          const position = new window.kakao.maps.LatLng(
+            parseFloat(selectedCompany.latitude),
+            parseFloat(selectedCompany.longitude)
+          );
+          const label = createCompanyLabel(selectedCompany, position);
+          label.setMap(mapRef.current);
+
+          selectedCompanyMarkerRef.current = marker;
+          selectedCompanyLabelRef.current = label;
+          console.log(`검색된 업체 커스텀 마커 및 라벨 생성: ${selectedCompany.name}`);
+        } catch (error) {
+          console.error("커스텀 마커 생성 실패, 기본 마커로 대체:", error);
+
+          // 실패시 기본 마커로 대체
+          const marker = new window.kakao.maps.Marker({
+            position: new window.kakao.maps.LatLng(
+              parseFloat(selectedCompany.latitude),
+              parseFloat(selectedCompany.longitude)
+            ),
+            map: mapRef.current,
+            zIndex: 1000
+          });
+
+          selectedCompanyMarkerRef.current = marker;
+        }
+      })();
+    }
+
+    // cleanup은 컴포넌트 언마운트시에만 실행
+    return () => {
+      // 컴포넌트가 언마운트될 때만 임시 마커 제거
+    };
+  }, [selectedCompany, companies]);
 
   // 업체 마커 표시
   useEffect(() => {

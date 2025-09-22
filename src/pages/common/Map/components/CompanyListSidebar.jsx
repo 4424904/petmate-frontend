@@ -17,14 +17,19 @@ function CompanyListSidebar({
   startIndex,
   currentPage,
   totalPages,
-  onPageChange
+  onPageChange,
+  onCompanySelect
 }) {
   const handleCompanyClick = (company) => {
     const targetMarker = companyMarkers.find(
       (m) => m.companyId === company.id
     );
     if (targetMarker) {
+      // 마커가 있으면 마커 클릭 이벤트 트리거
       window.kakao.maps.event.trigger(targetMarker, "click");
+    } else {
+      // 마커가 없으면 직접 업체 선택 (검색 결과에서 주로 발생)
+      onCompanySelect && onCompanySelect(company);
     }
   };
 

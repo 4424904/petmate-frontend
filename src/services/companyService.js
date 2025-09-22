@@ -65,8 +65,7 @@ export const getBusinessInfo = async (businessNumber) => {
 };
 
 // 근처 업체 조회
-export const getNearbyCompanies = async (latitude, longitude, radius = 5.0, serviceType =
-  null) => {
+export const getNearbyCompanies = async (latitude, longitude, radius = 5.0, serviceType = null, keyword = null) => {
       const params = {
           latitude: latitude.toString(),
           longitude: longitude.toString(),
@@ -75,6 +74,10 @@ export const getNearbyCompanies = async (latitude, longitude, radius = 5.0, serv
 
       if (serviceType) {
           params.serviceType = serviceType;
+      }
+
+      if (keyword) {
+          params.keyword = keyword;
       }
 
       const response = await apiRequest.get("/api/company/nearby", { params });

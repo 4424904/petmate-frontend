@@ -179,7 +179,8 @@ function MapPage() {
           currentLat,
           currentLng,
           50.0, // 넓은 반경으로 전역 검색 효과
-          selectedService
+          selectedService,
+          query // keyword 추가
         );
 
         // 검색어로 필터링
@@ -382,6 +383,7 @@ useEffect(() => {
           currentPage={currentPage}
           totalPages={totalPages}
           onPageChange={handlePageChange}
+          onCompanySelect={handleCompanySelect}
         />
 
         <MapContainer
