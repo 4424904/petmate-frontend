@@ -12,7 +12,9 @@ const CompanyInfoCard = ({ company }) => {
       setImageSrc(imageUrl);
     } else {
       // 외부 플레이스홀더 서비스 사용
-      setImageSrc("https://via.placeholder.com/80x80/e5e7eb/9ca3af?text=No+Image");
+      setImageSrc(
+        "https://via.placeholder.com/80x80/e5e7eb/9ca3af?text=No+Image"
+      );
     }
     setImageLoaded(false);
   }, [company?.image]);
@@ -25,7 +27,9 @@ const CompanyInfoCard = ({ company }) => {
 
   const handleImageError = () => {
     // 외부 플레이스홀더 서비스로 대체
-    setImageSrc("https://via.placeholder.com/80x80/e5e7eb/9ca3af?text=No+Image");
+    setImageSrc(
+      "https://via.placeholder.com/80x80/e5e7eb/9ca3af?text=No+Image"
+    );
     setImageLoaded(true);
   };
 
@@ -40,7 +44,7 @@ const CompanyInfoCard = ({ company }) => {
     >
       <div style={{ display: "flex", gap: "16px", alignItems: "center" }}>
         <div style={{ position: "relative", width: "80px", height: "80px" }}>
-          <img
+          {/* <img
             src={imageSrc}
             alt={company.name}
             style={{
@@ -53,7 +57,7 @@ const CompanyInfoCard = ({ company }) => {
             }}
             onLoad={handleImageLoad}
             onError={handleImageError}
-          />
+          /> */}
           {!imageLoaded && (
             <div
               style={{
@@ -71,7 +75,7 @@ const CompanyInfoCard = ({ company }) => {
                 color: "#9ca3af",
               }}
             >
-              로딩중...
+              준비중
             </div>
           )}
         </div>
@@ -212,8 +216,7 @@ const ProductSelectStep = () => {
   const filteredProducts =
     state.availableProducts?.filter(
       (product) =>
-        !selectedServiceType ||
-        product.serviceType === selectedServiceType
+        !selectedServiceType || product.serviceType === selectedServiceType
     ) || [];
 
   return (
