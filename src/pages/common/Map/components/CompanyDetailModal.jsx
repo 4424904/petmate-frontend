@@ -19,21 +19,27 @@ function CompanyDetailModal({ selectedCompany, onClose, onBookingClick }) {
   const [reviews, setReviews] = useState([]);
   const [reviewLoading, setReviewLoading] = useState(false);
   const [reviewError, setReviewError] = useState(null);
-  const [reviewStats, setReviewStats] = useState({
+  const zeroStats = {
     totalReviews: 0,
     averageRating: 0,
     ratingDistribution: [0, 0, 0, 0, 0],
-    totalLikes: 0
-  });
+    totalLikes: 0,
+  };
+  const [reviewStats, setReviewStats] = useState(zeroStats);
 
   const API_BASE = process.env.REACT_APP_SPRING_API_BASE || "http://localhost:8090";
 
   useEffect(() => {
     if (selectedCompany) {
-      console.log("=== CompanyDetailModal.selectedCompany ===");
-      console.log(selectedCompany);
+      // 업체 변경 시 리뷰 관련 상태 초기화
+      setReviews([]);
+      setReviewError(null);
+      setReviewLoading(false);
+      setReviewStats(zeroStats);
+      setShowFullSchedule(false);
+      // console.debug("=== CompanyDetailModal.selectedCompany ===", selectedCompany);
     }
-  }, [selectedCompany]);
+  }, [selectedCompany]); // 업체가 바뀔 때마다 초기화
 
   async function fetchCompanyReviews(companyId, page = 0, size = 10) {
     setReviewLoading(true);
@@ -44,30 +50,32 @@ function CompanyDetailModal({ selectedCompany, onClose, onBookingClick }) {
       const data = await res.json();
       const reviewList = Array.isArray(data) ? data : data.content || [];
       setReviews(reviewList);
-      
-      // 리뷰 통계 계산
+
       if (reviewList.length > 0) {
-        const totalRating = reviewList.reduce((sum, review) => sum + (review.rating || 0), 0);
-        const avgRating = (totalRating / reviewList.length).toFixed(1);
-        const totalLikes = reviewList.reduce((sum, review) => sum + (review.likes || 0), 0);
-        
+        const totalRating = reviewList.reduce((sum, review) => sum + (Number(review.rating) || 0), 0);
+        const avgRating = reviewList.length ? totalRating / reviewList.length : 0;
+        const totalLikes = reviewList.reduce((sum, review) => sum + (Number(review.likes) || 0), 0);
+
         const distribution = [0, 0, 0, 0, 0];
-        reviewList.forEach(review => {
-          if (review.rating >= 1 && review.rating <= 5) {
-            distribution[review.rating - 1]++;
-          }
+        reviewList.forEach((review) => {
+          const r = Number(review.rating) || 0;
+          if (r >= 1 && r <= 5) distribution[r - 1] += 1;
         });
-        
+
         setReviewStats({
           totalReviews: reviewList.length,
-          averageRating: parseFloat(avgRating),
+          averageRating: Number(avgRating.toFixed(1)),
           ratingDistribution: distribution,
-          totalLikes: totalLikes
+          totalLikes,
         });
+      } else {
+        // 리뷰 없으면 반드시 0으로 리셋
+        setReviewStats(zeroStats);
       }
     } catch (e) {
       setReviewError(e.message || "load error");
       setReviews([]);
+      setReviewStats(zeroStats); // 에러 시에도 안전하게 리셋
     } finally {
       setReviewLoading(false);
     }
@@ -76,7 +84,7 @@ function CompanyDetailModal({ selectedCompany, onClose, onBookingClick }) {
   useEffect(() => {
     const cid = selectedCompany?.id ?? selectedCompany?.companyId;
     if (activeTab === "review" && cid) fetchCompanyReviews(cid, 0, 10);
-  }, [activeTab, selectedCompany?.id, selectedCompany?.companyId]);
+  }, [activeTab, selectedCompany?.id, selectedCompany?.companyId]); // 탭 전환/업체 변경 시 재조회
 
   const getCompanyImageUrl = (imageData) => {
     if (!imageData) return null;
@@ -87,11 +95,13 @@ function CompanyDetailModal({ selectedCompany, onClose, onBookingClick }) {
 
   const formatDate = (dateString) => {
     if (!dateString) return "";
-    return dateString.slice(0, 10).replace(/-/g, '.');
+    return String(dateString).slice(0, 10).replace(/-/g, ".");
   };
 
   const renderStars = (rating) => {
-    return "★".repeat(rating) + "☆".repeat(5 - rating);
+    const r = Math.max(0, Math.min(5, Number(rating) || 0));
+    const full = Math.floor(r);
+    return "★".repeat(full) + "☆".repeat(5 - full);
   };
 
   if (!selectedCompany) return null;
@@ -262,13 +272,13 @@ function CompanyDetailModal({ selectedCompany, onClose, onBookingClick }) {
                   <p>리뷰를 불러오는 중...</p>
                 </div>
               )}
-              
+
               {reviewError && (
                 <div className="review-error">
                   <p>리뷰를 불러오는데 실패했습니다: {reviewError}</p>
                 </div>
               )}
-              
+
               {!reviewLoading && !reviewError && (
                 <>
                   {/* 리뷰 통계 섹션 */}
@@ -276,8 +286,8 @@ function CompanyDetailModal({ selectedCompany, onClose, onBookingClick }) {
                     <div className="review-stats-header">
                       <h3>❤️ 애정도 리뷰 ({reviewStats.totalReviews})</h3>
                     </div>
-                    
-                    {reviewStats.totalReviews > 0 && (
+
+                    {reviewStats.totalReviews > 0 ? (
                       <div className="review-summary">
                         <div className="rating-overview">
                           <div className="average-rating">
@@ -287,18 +297,48 @@ function CompanyDetailModal({ selectedCompany, onClose, onBookingClick }) {
                             </div>
                             <span className="rating-label">평균 평점</span>
                           </div>
-                          
+
                           <div className="stats-grid">
                             <div className="stat-item">
                               <span className="stat-number">{reviewStats.totalReviews}</span>
                               <span className="stat-label">총 리뷰수</span>
                             </div>
                             <div className="stat-item">
-                              <span className="stat-number">{Math.round((reviewStats.ratingDistribution[4] / reviewStats.totalReviews) * 100) || 0}%</span>
+                              <span className="stat-number">
+                                {Math.round(
+                                  (reviewStats.ratingDistribution[4] / reviewStats.totalReviews) * 100
+                                ) || 0}
+                                %
+                              </span>
                               <span className="stat-label">응답률</span>
                             </div>
                             <div className="stat-item">
                               <span className="stat-number">{reviewStats.totalLikes}</span>
+                              <span className="stat-label">최근 예약</span>
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                    ) : (
+                      // 리뷰가 없을 때 0점 표시
+                      <div className="review-summary">
+                        <div className="rating-overview">
+                          <div className="average-rating">
+                            <span className="rating-number">0.0</span>
+                            <div className="rating-stars">{renderStars(0)}</div>
+                            <span className="rating-label">평균 평점</span>
+                          </div>
+                          <div className="stats-grid">
+                            <div className="stat-item">
+                              <span className="stat-number">0</span>
+                              <span className="stat-label">총 리뷰수</span>
+                            </div>
+                            <div className="stat-item">
+                              <span className="stat-number">0%</span>
+                              <span className="stat-label">응답률</span>
+                            </div>
+                            <div className="stat-item">
+                              <span className="stat-number">0</span>
                               <span className="stat-label">최근 예약</span>
                             </div>
                           </div>
@@ -320,17 +360,17 @@ function CompanyDetailModal({ selectedCompany, onClose, onBookingClick }) {
                           <div className="review-header">
                             <div className="reviewer-info">
                               <div className="reviewer-avatar">
-                                {(review.ownerNickName || '익명').charAt(0)}
+                                {(review.ownerNickName || "익명").charAt(0)}
                               </div>
                               <div className="reviewer-details">
-                                <span className="reviewer-name">{review.ownerNickName || '익명'}</span>
+                                <span className="reviewer-name">{review.ownerNickName || "익명"}</span>
                                 <span className="reviewer-badge">with 댕댕이</span>
                                 <span className="review-category">통털</span>
                               </div>
                             </div>
                             <div className="review-meta">
                               <div className="review-rating">
-                                {renderStars(review.rating || 0)}
+                                {renderStars(Number(review.rating) || 0)}
                               </div>
                               <span className="review-date">{formatDate(review.createdAt)}</span>
                               <div className="review-likes">
@@ -340,7 +380,6 @@ function CompanyDetailModal({ selectedCompany, onClose, onBookingClick }) {
                             </div>
                           </div>
 
-                          {/* 키워드 태그 */}
                           {review.keywords && review.keywords.length > 0 && (
                             <div className="review-keywords">
                               {review.keywords.map((keyword, kidx) => (
@@ -351,14 +390,12 @@ function CompanyDetailModal({ selectedCompany, onClose, onBookingClick }) {
                             </div>
                           )}
 
-                          {/* 리뷰 내용 */}
                           {review.comment && (
                             <div className="review-content">
                               <p>{review.comment}</p>
                             </div>
                           )}
 
-                          {/* 리뷰 이미지 (있는 경우) */}
                           {review.images && review.images.length > 0 && (
                             <div className="review-images">
                               {review.images.slice(0, 3).map((img, imgIdx) => (
@@ -369,7 +406,6 @@ function CompanyDetailModal({ selectedCompany, onClose, onBookingClick }) {
                             </div>
                           )}
 
-                          {/* 도움이 되었나요? */}
                           <div className="review-actions">
                             <button className="helpful-btn">
                               👍 도움됐어요 ({Math.floor(Math.random() * 50) + 10})
@@ -381,11 +417,14 @@ function CompanyDetailModal({ selectedCompany, onClose, onBookingClick }) {
                     </div>
                   )}
 
-                  {/* 더보기 버튼 */}
                   {reviews.length > 0 && (
                     <div className="review-more">
                       <button className="more-reviews-btn">
-                        리뷰 더보기 ({reviewStats.totalReviews > reviews.length ? reviewStats.totalReviews - reviews.length : 0}개 더)
+                        리뷰 더보기 (
+                        {reviewStats.totalReviews > reviews.length
+                          ? reviewStats.totalReviews - reviews.length
+                          : 0}
+                        개 더)
                       </button>
                     </div>
                   )}
@@ -400,10 +439,10 @@ function CompanyDetailModal({ selectedCompany, onClose, onBookingClick }) {
                 <h4>사진</h4>
                 <div className="photo-grid">
                   {selectedCompany.images && selectedCompany.images.length > 0 ? (
-                    selectedCompany.images
-                      .sort((a, b) => a.displayOrder - b.displayOrder)
+                    [...selectedCompany.images]
+                      .sort((a, b) => (a.displayOrder ?? 0) - (b.displayOrder ?? 0))
                       .map((image, index) => (
-                        <div key={image.id} className="photo-item">
+                        <div key={image.id || index} className="photo-item">
                           <img
                             src={getCompanyImageUrl(image)}
                             alt={image.altText || `${selectedCompany.name} 사진 ${index + 1}`}
