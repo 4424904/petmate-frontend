@@ -31,15 +31,13 @@ function CompanyDetailModal({ selectedCompany, onClose, onBookingClick }) {
 
   useEffect(() => {
     if (selectedCompany) {
-      // 업체 변경 시 리뷰 관련 상태 초기화
       setReviews([]);
       setReviewError(null);
       setReviewLoading(false);
       setReviewStats(zeroStats);
       setShowFullSchedule(false);
-      // console.debug("=== CompanyDetailModal.selectedCompany ===", selectedCompany);
     }
-  }, [selectedCompany]); // 업체가 바뀔 때마다 초기화
+  }, [selectedCompany]);
 
   async function fetchCompanyReviews(companyId, page = 0, size = 10) {
     setReviewLoading(true);
@@ -69,13 +67,12 @@ function CompanyDetailModal({ selectedCompany, onClose, onBookingClick }) {
           totalLikes,
         });
       } else {
-        // 리뷰 없으면 반드시 0으로 리셋
         setReviewStats(zeroStats);
       }
     } catch (e) {
       setReviewError(e.message || "load error");
       setReviews([]);
-      setReviewStats(zeroStats); // 에러 시에도 안전하게 리셋
+      setReviewStats(zeroStats);
     } finally {
       setReviewLoading(false);
     }
@@ -84,7 +81,7 @@ function CompanyDetailModal({ selectedCompany, onClose, onBookingClick }) {
   useEffect(() => {
     const cid = selectedCompany?.id ?? selectedCompany?.companyId;
     if (activeTab === "review" && cid) fetchCompanyReviews(cid, 0, 10);
-  }, [activeTab, selectedCompany?.id, selectedCompany?.companyId]); // 탭 전환/업체 변경 시 재조회
+  }, [activeTab, selectedCompany?.id, selectedCompany?.companyId]);
 
   const getCompanyImageUrl = (imageData) => {
     if (!imageData) return null;
@@ -98,10 +95,11 @@ function CompanyDetailModal({ selectedCompany, onClose, onBookingClick }) {
     return String(dateString).slice(0, 10).replace(/-/g, ".");
   };
 
-  const renderStars = (rating) => {
+  // ★ → ♥ (빨간하트/빈하트)
+  const renderHearts = (rating) => {
     const r = Math.max(0, Math.min(5, Number(rating) || 0));
     const full = Math.floor(r);
-    return "★".repeat(full) + "☆".repeat(5 - full);
+    return "❤️".repeat(full) + "🤍".repeat(5 - full);
   };
 
   if (!selectedCompany) return null;
@@ -293,9 +291,9 @@ function CompanyDetailModal({ selectedCompany, onClose, onBookingClick }) {
                           <div className="average-rating">
                             <span className="rating-number">{reviewStats.averageRating}</span>
                             <div className="rating-stars">
-                              {renderStars(Math.round(reviewStats.averageRating))}
+                              {renderHearts(Math.round(reviewStats.averageRating))}
                             </div>
-                            <span className="rating-label">평균 평점</span>
+                            <span className="rating-label">평균 애정도</span>
                           </div>
 
                           <div className="stats-grid">
@@ -320,13 +318,12 @@ function CompanyDetailModal({ selectedCompany, onClose, onBookingClick }) {
                         </div>
                       </div>
                     ) : (
-                      // 리뷰가 없을 때 0점 표시
                       <div className="review-summary">
                         <div className="rating-overview">
                           <div className="average-rating">
                             <span className="rating-number">0.0</span>
-                            <div className="rating-stars">{renderStars(0)}</div>
-                            <span className="rating-label">평균 평점</span>
+                            <div className="rating-stars">{renderHearts(0)}</div>
+                            <span className="rating-label">평균 애정도</span>
                           </div>
                           <div className="stats-grid">
                             <div className="stat-item">
@@ -370,7 +367,7 @@ function CompanyDetailModal({ selectedCompany, onClose, onBookingClick }) {
                             </div>
                             <div className="review-meta">
                               <div className="review-rating">
-                                {renderStars(Number(review.rating) || 0)}
+                                {renderHearts(Number(review.rating) || 0)}
                               </div>
                               <span className="review-date">{formatDate(review.createdAt)}</span>
                               <div className="review-likes">
