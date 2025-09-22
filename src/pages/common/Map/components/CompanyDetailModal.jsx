@@ -10,10 +10,27 @@ import map_icon3 from "../../../../assets/images/map/map_icon3.png";
 import map_icon4 from "../../../../assets/images/map/map_icon4.png";
 import map_icon5 from "../../../../assets/images/map/map_icon5.png";
 import map_icon6 from "../../../../assets/images/map/map_icon6.png";
-
 function CompanyDetailModal({ selectedCompany, onClose, onBookingClick }) {
   const [activeTab, setActiveTab] = useState('home');
   const [showFullSchedule, setShowFullSchedule] = useState(false);
+
+  // 이미지 URL 생성 함수
+  const getCompanyImageUrl = (imageData) => {
+    if (!imageData) return null;
+
+    // 이미 완전한 URL인 경우
+    if (imageData.filePath && imageData.filePath.startsWith('http')) {
+      return imageData.filePath;
+    }
+
+    // S3 키인 경우 백엔드 파일 서비스 API를 통해 URL 생성
+    if (imageData.filePath) {
+      const baseUrl = process.env.REACT_APP_SPRING_API_BASE || 'http://localhost:8090';
+      return `${baseUrl}/api/files/view?filePath=${encodeURIComponent(imageData.filePath)}`;
+    }
+
+    return null;
+  };
 
   if (!selectedCompany) return null;
 
@@ -38,7 +55,7 @@ function CompanyDetailModal({ selectedCompany, onClose, onBookingClick }) {
 
             return displayImage ? (
               <img
-                src={displayImage.filePath}
+                src={getCompanyImageUrl(displayImage)}
                 alt={displayImage.altText || `${selectedCompany.name} 대표 사진`}
                 className="company-main-image"
                 onError={(e) => {
@@ -199,10 +216,10 @@ function CompanyDetailModal({ selectedCompany, onClose, onBookingClick }) {
                 </div>
               </div>
                 
-              {selectedCompany.description && (
+              {selectedCompany.descText && (
                 <div className="info-section">
                   <h4>업체 소개</h4>
-                  <p className="description">{selectedCompany.description}</p>
+                  <p className="description">{selectedCompany.descText}</p>
                 </div>
               )}
             </div>
@@ -220,10 +237,10 @@ function CompanyDetailModal({ selectedCompany, onClose, onBookingClick }) {
             <div className="review-content">
               <div className="info-section">
                 <h4>이런 점이 좋았어요</h4>
-                <div className="review-item">
-                    <span className="review-keyword">반려동물을 잘 다뤄줘요</span>
-                    <span className="review-keyword">맞춤케어를 잘 해줘요</span>
-                    <span className="review-keyword">친절해요</span>
+                <div className="review-keywords">
+                    <div className="review-keyword">반려동물을 잘 다뤄줘요</div>
+                    <div className="review-keyword">맞춤케어를 잘 해줘요</div>
+                    <div className="review-keyword">친절해요</div>
                 </div>
                 <div className="review-deatail">
                   <div className="review-section">
@@ -242,13 +259,6 @@ function CompanyDetailModal({ selectedCompany, onClose, onBookingClick }) {
             <div className="photo-content">
               <div className="info-section">
                 <h4>사진</h4>
-                <div style={{ padding: '10px', background: '#f0f0f0', marginBottom: '10px', fontSize: '12px' }}>
-                  디버깅: images = {JSON.stringify(selectedCompany.images)}<br/>
-                  bizRegNo = {selectedCompany.bizRegNo}<br/>
-                  type = {selectedCompany.type}<br/>
-                  name = {selectedCompany.name}<br/>
-                  ssnFirst = {selectedCompany.ssnFirst}
-                </div>
                 <div className="photo-grid">
                   {selectedCompany.images && selectedCompany.images.length > 0 ? (
                     selectedCompany.images
@@ -256,7 +266,7 @@ function CompanyDetailModal({ selectedCompany, onClose, onBookingClick }) {
                       .map((image, index) => (
                         <div key={image.id} className="photo-item">
                           <img
-                            src={image.filePath}
+                            src={getCompanyImageUrl(image)}
                             alt={image.altText || `${selectedCompany.name} 사진 ${index + 1}`}
                             className="company-photo"
                             onError={(e) => {

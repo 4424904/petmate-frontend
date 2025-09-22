@@ -6,7 +6,7 @@ const API_BASE = process.env.REACT_APP_SPRING_API_BASE || "http://localhost:8090
 const api = axios.create({
     baseURL: API_BASE,
     withCredentials: true,   // refreshToken HttpOnly 쿠키
-    timeout: 10000,
+    timeout: 60000,
 });
 
 // === 토큰 유틸 ===

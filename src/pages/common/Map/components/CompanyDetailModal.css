@@ -268,9 +268,8 @@
 }
 
 #company-modal .photo-item {
-  height: 120px;
+  height: 150px;
   background: #f8f9fa;
-  border: 2px dashed #ddd;
   border-radius: 8px;
   display: flex;
   align-items: center;
@@ -396,6 +395,23 @@
   border-radius: 8px;
   padding: 16px;
   margin-bottom: 12px;
+}
+
+#company-modal .review-keywords {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin-bottom: 16px;
+}
+
+#company-modal .review-keyword {
+  background: #f5f5f5;
+  color: #333;
+  padding: 8px 12px;
+  border-radius: 6px;
+  font-size: 14px;
+  font-weight: 500;
+  width: fit-content;
 }
 
 #company-modal .review-header {
@@ -600,6 +616,7 @@
 }
 
 /* 리뷰 스타일 */
-#company-modal .review-content {
+#company-modal .review-content,
+#company-modal .photo-content {
   padding: 16px;
 }
