@@ -238,10 +238,13 @@ function CompanyRegisterPage() {
 
 
     const handleTelFirstInput = (e) => {
-        const numericValue = handleNumericInput(e.target.value, 3);
+        const numericValue = handleNumericInput(e.target.value, 4);
         handleInputChange('phone1', numericValue);
-        if (numericValue.length === 3 && telSecondRef.current !== null) {
-            telSecondRef.current.focus();
+        // 02는 2자리에서, 다른 번호는 3자리에서 자동 포커스 이동
+        if (telSecondRef.current !== null) {
+            if (numericValue === '02' || numericValue.length === 3) {
+                telSecondRef.current.focus();
+            }
         }
     };
                                                  
@@ -286,7 +289,7 @@ function CompanyRegisterPage() {
         // 공통 필수 필드 체크
         if (!formInputs.roadAddr.trim() ||
             !formInputs.mainService ||
-            !formInputs.phone1 || formInputs.phone1.length !== 3 ||
+            !formInputs.phone1 || (formInputs.phone1.length !== 2 && formInputs.phone1.length !== 3) ||
             !formInputs.phone2 || formInputs.phone2.length !== 4 ||
             !formInputs.phone3 || formInputs.phone3.length !== 4) {
             hasErrors = true;
@@ -847,10 +850,10 @@ function CompanyRegisterPage() {
                             <div className="company_form_group">
                                 <span>연락처</span>
                                 <div className="tel_input_group">
-                                    <input 
+                                    <input
                                         type="tel"
                                         className="tel_form_input"
-                                        maxLength={3}
+                                        maxLength={4}
                                         value={formInputs.phone1}
                                         onChange={handleTelFirstInput}
                                     />
