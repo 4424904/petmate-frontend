@@ -55,10 +55,20 @@ const Calendar = ({ selectedDate, onDateSelect, disabledDates = [] }) => {
   };
 
   const monthNames = [
-    "1월","2월","3월","4월","5월","6월",
-    "7월","8월","9월","10월","11월","12월"
+    "1월",
+    "2월",
+    "3월",
+    "4월",
+    "5월",
+    "6월",
+    "7월",
+    "8월",
+    "9월",
+    "10월",
+    "11월",
+    "12월",
   ];
-  const dayNames = ["일","월","화","수","목","금","토"];
+  const dayNames = ["일", "월", "화", "수", "목", "금", "토"];
 
   return (
     <div className="calendar">
@@ -85,7 +95,9 @@ const Calendar = ({ selectedDate, onDateSelect, disabledDates = [] }) => {
                   ${dayData.isSelected ? "selected" : ""} 
                   ${dayData.isPast ? "past" : ""} 
                   ${dayData.isToday ? "today" : ""}`}
-                onClick={() => dayData.isAvailable && onDateSelect(dayData.date)}
+                onClick={() =>
+                  dayData.isAvailable && onDateSelect(dayData.date)
+                }
                 disabled={!dayData.isAvailable}
               >
                 {dayData.day}
@@ -99,10 +111,20 @@ const Calendar = ({ selectedDate, onDateSelect, disabledDates = [] }) => {
 };
 
 // 시간 슬롯
-const TimeSlots = ({ timeSlots, selectedTimeSlot, onTimeSlotSelect, loading }) => {
-  if (loading) return <div className="loading-text">시간대를 불러오는 중...</div>;
+const TimeSlots = ({
+  timeSlots,
+  selectedTimeSlot,
+  onTimeSlotSelect,
+  loading,
+}) => {
+  if (loading)
+    return <div className="loading-text">시간대를 불러오는 중...</div>;
   if (!timeSlots || timeSlots.length === 0)
-    return <div className="empty-text">선택한 날짜에 예약 가능한 시간이 없습니다.</div>;
+    return (
+      <div className="empty-text">
+        선택한 날짜에 예약 가능한 시간이 없습니다.
+      </div>
+    );
 
   return (
     <div className="timeslots">
@@ -118,7 +140,11 @@ const TimeSlots = ({ timeSlots, selectedTimeSlot, onTimeSlotSelect, loading }) =
           <div className="timeslot-time">
             {slot.startTime} - {slot.endTime}
           </div>
-          <div className={`timeslot-status ${slot.available ? "available" : "unavailable"}`}>
+          <div
+            className={`timeslot-status ${
+              slot.available ? "available" : "unavailable"
+            }`}
+          >
             {slot.available ? "예약가능" : "예약불가"}
           </div>
         </button>
@@ -142,16 +168,23 @@ const PetSelection = ({ pets, selectedPets, onPetToggle, loading }) => {
       {pets.map((pet) => {
         // 백엔드 응답 형식에 맞게 수정
         const petBreed = pet.breed || pet.breedName || "알 수 없음";
-        const petAge = pet.age || "알 수 없음";
+        const petAge = pet.ageYear || "알 수 없음";
 
         // 고양이/강아지 아이콘 선택 (품종명 또는 이름으로 판단)
-        const Icon = (petBreed.includes("고양이") || petBreed.includes("냥") ||
-                      pet.name.includes("냥") || pet.name.includes("고양이")) ? FaCat : FaDog;
+        const Icon =
+          petBreed.includes("고양이") ||
+          petBreed.includes("냥") ||
+          pet.name.includes("냥") ||
+          pet.name.includes("고양이")
+            ? FaCat
+            : FaDog;
 
         return (
           <div
             key={pet.id}
-            className={`pet-card ${selectedPets.includes(pet.id) ? "selected" : ""}`}
+            className={`pet-card ${
+              selectedPets.includes(pet.id) ? "selected" : ""
+            }`}
             onClick={() => onPetToggle(pet.id)}
           >
             <div className="pet-avatar">
@@ -159,9 +192,13 @@ const PetSelection = ({ pets, selectedPets, onPetToggle, loading }) => {
             </div>
             <div className="pet-info">
               <h5>{pet.name}</h5>
-              <p>{petBreed} • {petAge}살</p>
+              <p>
+                {petBreed} • {petAge}살
+              </p>
             </div>
-            {selectedPets.includes(pet.id) && <div className="pet-check">✓</div>}
+            {selectedPets.includes(pet.id) && (
+              <div className="pet-check">✓</div>
+            )}
           </div>
         );
       })}
@@ -181,7 +218,9 @@ const DateSelectStep = () => {
     if (!state.selectedProduct?.companyId) return;
 
     try {
-      const companyInfo = await getCompanyByIdPublic(state.selectedProduct.companyId);
+      const companyInfo = await getCompanyByIdPublic(
+        state.selectedProduct.companyId
+      );
       console.log("업체 정보:", companyInfo);
 
       if (companyInfo.operatingHours) {
@@ -204,7 +243,11 @@ const DateSelectStep = () => {
       const endDate = new Date();
       endDate.setMonth(endDate.getMonth() + 3);
 
-      for (let date = new Date(startDate); date <= endDate; date.setDate(date.getDate() + 1)) {
+      for (
+        let date = new Date(startDate);
+        date <= endDate;
+        date.setDate(date.getDate() + 1)
+      ) {
         const dayOfWeek = date.getDay(); // 0=일요일, 1=월요일, ...
         const dayKey = getDayKeyFromDayOfWeek(dayOfWeek);
 
@@ -235,7 +278,7 @@ const DateSelectStep = () => {
       3: "수요일",
       4: "목요일",
       5: "금요일",
-      6: "토요일"
+      6: "토요일",
     };
     return dayMapping[dayOfWeek] || "월요일";
   };
@@ -276,7 +319,10 @@ const DateSelectStep = () => {
     try {
       dispatch({ type: "SET_LOADING", field: "timeSlots", value: true });
       const formattedDate = formatDateForAPI(date);
-      const timeSlots = await getAvailableTimeSlots(state.selectedProduct.id, formattedDate);
+      const timeSlots = await getAvailableTimeSlots(
+        state.selectedProduct.id,
+        formattedDate
+      );
       dispatch({ type: "SET_AVAILABLE_TIME_SLOTS", payload: timeSlots || [] });
     } catch (error) {
       console.error("시간 슬롯 로드 실패:", error);
@@ -306,7 +352,11 @@ const DateSelectStep = () => {
   };
 
   const handleNext = () => {
-    if (state.selectedDate && state.selectedTimeSlot && state.selectedPets.length > 0) {
+    if (
+      state.selectedDate &&
+      state.selectedTimeSlot &&
+      state.selectedPets.length > 0
+    ) {
       dispatch({ type: "SET_STEP", payload: 3 });
     }
   };
@@ -316,7 +366,9 @@ const DateSelectStep = () => {
   };
 
   const isNextEnabled =
-    state.selectedDate && state.selectedTimeSlot && state.selectedPets.length > 0;
+    state.selectedDate &&
+    state.selectedTimeSlot &&
+    state.selectedPets.length > 0;
 
   return (
     <div className="date-select_wrap">
@@ -350,12 +402,23 @@ const DateSelectStep = () => {
 
       <div className="section">
         <h4>반려동물 선택</h4>
-        <PetSelection pets={pets} selectedPets={state.selectedPets} onPetToggle={handlePetToggle} loading={loading} />
+        <PetSelection
+          pets={pets}
+          selectedPets={state.selectedPets}
+          onPetToggle={handlePetToggle}
+          loading={loading}
+        />
       </div>
 
       <div className="footer-btns">
-        <button className="btn-prev" onClick={handlePrev}>이전</button>
-        <button className="btn-next" onClick={handleNext} disabled={!isNextEnabled}>
+        <button className="btn-prev" onClick={handlePrev}>
+          이전
+        </button>
+        <button
+          className="btn-next"
+          onClick={handleNext}
+          disabled={!isNextEnabled}
+        >
           다음 단계
         </button>
       </div>

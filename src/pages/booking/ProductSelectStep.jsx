@@ -211,7 +211,6 @@ const ProductSelectStep = () => {
     state.availableProducts?.filter(
       (product) =>
         !selectedServiceType ||
-        selectedServiceType === "C" ||
         product.serviceType === selectedServiceType
     ) || [];
 
