@@ -33,7 +33,7 @@ const BookingHistoryPage = () => {
 
   const isCompleted = (status) => {
     const s = String(status);
-    return s === "2" || s === "completed";
+    return s === "1" || s === "completed";
   };
 
   const goToReview = (booking) => {
