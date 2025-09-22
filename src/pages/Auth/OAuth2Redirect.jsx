@@ -1,8 +1,10 @@
 // src/pages/Auth/OAuth2Redirect.jsx
 import { useEffect } from "react";
 import { useNavigate } from "react-router-dom";
+import { useAuth } from "../../contexts/AuthContext";
 
 export default function OAuth2Redirect({ setIsLogined }) {
+    const { hydrateMe } = useAuth();
     const navigate = useNavigate();
 
     useEffect(() => {
@@ -36,13 +38,18 @@ export default function OAuth2Redirect({ setIsLogined }) {
             if (storedNext) sessionStorage.removeItem("postLoginRedirect");
             setIsLogined?.(true);
 
+            // 사용자 정보 가져오기
+            if (hydrateMe) {
+                hydrateMe();
+            }
+
             // URL 정리 후 이동
             window.history.replaceState(null, "", next);
             navigate(next, { replace: true });
         } catch {
             navigate("/signin?error=oauth2", { replace: true });
         }
-    }, [navigate, setIsLogined]);
+    }, [navigate, setIsLogined, hydrateMe]);
 
     return <div style={{ padding: 16 }}>로그인 처리중...</div>;
 }
