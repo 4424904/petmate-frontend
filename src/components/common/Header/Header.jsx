@@ -4,6 +4,7 @@ import "./Header.css";
 import * as addressService from "../../../services/addressService.js";
 import { useRef, useState, useEffect } from "react";
 import { useAuth } from "../../../contexts/AuthContext";
+import { fetchUserProfileImage } from "../../../util/ImageUtil";
 import {
   MapPin,
   Dog,
@@ -25,6 +26,7 @@ function Header() {
   const { isLogined, user, logout, currentMode, switchMode } = useAuth();
   const [userOpen, setUserOpen] = useState(false);
   const [defaultAddress, setDefaultAddress] = useState(null);
+  const [profileImageUrl, setProfileImageUrl] = useState(null);
   const closeTimer = useRef(null);
   const navigate = useNavigate();
 
@@ -65,9 +67,6 @@ function Header() {
   const displayName =
     user?.name || user?.nickname || user?.email || user?.userId || "사용자";
 
-  const profileSrc =
-    user?.profileImage || user?.picture || user?.avatarUrl || null;
-
   const onUserEnter = () => {
     if (closeTimer.current) {
       clearTimeout(closeTimer.current);
@@ -95,6 +94,33 @@ function Header() {
     window.addEventListener("scroll", handleScroll);
     return () => window.removeEventListener("scroll", handleScroll);
   }, []);
+
+  // 프로필 이미지 로드
+  useEffect(() => {
+    const loadProfileImage = async () => {
+      if (!isLogined || !user?.email) {
+        console.log('🔍 [Header] 프로필 이미지 로드 스킵: 로그인 안됨 또는 email 없음', { isLogined, email: user?.email });
+        setProfileImageUrl(null);
+        return;
+      }
+
+      try {
+        console.log('🔍 [Header] fetchUserProfileImage 호출:', {
+          email: user.email,
+          role: user.role,
+          currentMode
+        });
+        const imageUrl = await fetchUserProfileImage(user.email, user.role, currentMode);
+        console.log('✅ [Header] 프로필 이미지 URL 결과:', imageUrl);
+        setProfileImageUrl(imageUrl);
+      } catch (error) {
+        console.warn("❌ [Header] 프로필 이미지 로드 오류:", error);
+        setProfileImageUrl(null);
+      }
+    };
+
+    loadProfileImage();
+  }, [isLogined, user?.email, user?.role, currentMode]);
 
   // 기본 주소 불러오기 + 변경 감지
   useEffect(() => {
@@ -169,9 +195,9 @@ function Header() {
                 onClick={onUserToggleClick}
               >
                 <div className="avatar">
-                  {profileSrc ? (
+                  {profileImageUrl ? (
                     <img
-                      src={profileSrc}
+                      src={profileImageUrl}
                       alt="프로필"
                       className="avatar-img"
                       referrerPolicy="no-referrer"

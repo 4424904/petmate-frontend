@@ -64,6 +64,51 @@ export const fetchImagesByReference = async (imageTypeCode, referenceId) => {
     }
 };
 
+// 사용자 프로필 이미지 조회 (반려인: 01, 펫메이트: 06)
+export const fetchUserProfileImage = async (userId, userRole, currentMode = null) => {
+    try {
+        console.log('🔍 [fetchUserProfileImage] 호출됨:', { userId, userRole, currentMode });
+
+        // 사용자 역할에 따른 ImageType 결정
+        let imageTypeCode;
+
+        // Role 4 (양쪽 역할)인 경우 현재 모드에 따라 결정
+        if (userRole === "4" || userRole === 4) {
+            imageTypeCode = currentMode === "petmate" ? "06" : "01";
+        }
+        // Role 3 (펫메이트)
+        else if (userRole === "3" || userRole === 3) {
+            imageTypeCode = "06";
+        }
+        // Role 2 (반려인) 또는 기타
+        else {
+            imageTypeCode = "01";
+        }
+
+        console.log('🔍 [fetchUserProfileImage] 결정된 imageTypeCode:', imageTypeCode);
+
+        const response = await fetchImagesByReference(imageTypeCode, userId);
+        console.log('🔍 [fetchUserProfileImage] API 응답:', response);
+
+        if (response.success && response.images && response.images.length > 0) {
+            // 첫 번째 이미지 또는 썸네일 이미지 반환
+            const thumbnailImage = response.images.find(img => img.isThumbnail);
+            const profileImage = thumbnailImage || response.images[0];
+            console.log('🔍 [fetchUserProfileImage] 선택된 이미지:', profileImage);
+
+            const imageUrl = getImageUrl(profileImage);
+            console.log('🔍 [fetchUserProfileImage] 최종 URL:', imageUrl);
+            return imageUrl;
+        }
+
+        console.log('🔍 [fetchUserProfileImage] 이미지 없음 - null 반환');
+        return null;
+    } catch (err) {
+        console.warn('❌ [fetchUserProfileImage] 프로필 이미지 조회 실패:', err.message);
+        return null;
+    }
+};
+
 // ====== 이미지 뷰어 컴포넌트 ======
 
 // 가로 슬라이드 이미지 뷰어
@@ -559,6 +604,7 @@ export default {
     // 조회 함수
     fetchSingleImage,
     fetchImagesByReference,
+    fetchUserProfileImage,
 
     // 뷰어 컴포넌트
     ImageSlider,
